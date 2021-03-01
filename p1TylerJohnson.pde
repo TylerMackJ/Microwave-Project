@@ -4,16 +4,23 @@ ControlP5 cp5;
 
 boolean doorOpen = true;
 Button[] presets = new Button[6];
-boolean presetMode = true;
+int powerLevel = 10;
+boolean presetMode = false;
 int timeM = 0;
 int timeS = 0;
+boolean running = false;
+int frame = 0;
+int fps = 30;
+boolean tcMode = false;
+boolean setupComplete = false;
 
 void setup() {
   size(1000, 500);
   cp5 = new ControlP5(this);
+  frameRate(fps);
   
   cp5.addButton("open").setValue(0).setPosition(760, 410).setSize(137, 60).setCaptionLabel("Open");
-  cp5.addButton("start").setValue(0).setPosition(906, 410).setSize(63, 60).setCaptionLabel("Start");
+  cp5.addButton("start").setValue(0).setPosition(906, 410).setSize(63, 60).setCaptionLabel("Start\n Stop");
   
   cp5.addButton("thirty").setValue(0).setPosition(760, 360).setSize(63, 40).setCaptionLabel("Add 0:30");
   cp5.addButton("zero").setValue(0).setPosition(833, 360).setSize(63, 40).setCaptionLabel("0");
@@ -34,6 +41,10 @@ void setup() {
   cp5.addButton("preset").setValue(0).setPosition(760, 150).setSize(137, 50).setCaptionLabel("Preset/Reheat");
   cp5.addButton("timecook").setValue(0).setPosition(906, 150).setSize(63, 50).setCaptionLabel("Time Cook"); 
   
+  cp5.addButton("levelDown").setValue(0).setPosition(760, 100).setSize(50, 40).setCaptionLabel("Power -");
+  cp5.addButton("levelUp").setValue(0).setPosition(820, 100).setSize(50, 40).setCaptionLabel("Power +");
+  
+  setupComplete = true;
 }
 
 void draw() {
@@ -61,8 +72,35 @@ void draw() {
   // Time
   textSize(40);
   fill(0, 0, 0);
-  String timeText = str(timeM) + ":" + str(timeS);
-  text(timeText, 810, 100); 
+  String timeText = String.format("%02d:%02d", timeM, timeS);
+  text(timeText, 810, 75); 
+  
+  // Info
+  textSize(12);
+  String infoText = String.format("   %s\n  %s\n    Power %s", running ? "Running" : "", tcMode ? "Time Cook" : "", presetMode ? "Auto" : str(powerLevel));
+  text(infoText, 880, 100);
+  
+  // Microwave is counting down
+  if(running) {
+    frame++;
+    // One second has passed
+    if (frame == fps) {
+      frame = 0;
+      timeS--;
+      
+      if (timeS < 0) {
+        timeM--;
+        if(timeM < 0) {
+          timeM = 0;
+          timeS = 0;
+          running = false;
+        } else {
+          timeS = 59;
+        }
+      }
+      
+    }
+  }
 }
 
 public void open() {
@@ -99,21 +137,82 @@ public void eight() {
 public void nine() {
   numberPressed(9);
 }
+public void thirty() {
+  if(setupComplete) {
+    timeS += 30;
+    if(int(timeS / 60) != 0) {
+      timeM += + int(timeS / 60);
+    }
+    timeS %= 60;
+    timeM %= 100;
+  }
+}
+public void timecook() {
+  if(setupComplete) {
+    tcMode = !tcMode;
+  }
+}
+public void start() {
+  if(setupComplete) {
+    running = !running;
+    frame = 0;
+  }
+}
+public void levelDown() {
+  powerLevel--;
+  if(powerLevel < 0) {
+    powerLevel = 0;
+  }
+}
+public void levelUp() {
+  powerLevel++;
+  if(powerLevel > 10) {
+    powerLevel = 10;
+  }
+}
+
+public void clear() {
+  timeS = 0;
+  timeM = 0;
+}
 
 public void numberPressed(int value) {
-  println(value);
+  if(setupComplete && !running) {  
+    boolean presetUsed = false;
+    if (presetMode && value >= 1 && value <= 6) {
+      presetUsed = true;
+      timeM = 3;
+      timeS = 0;
+      running = true;
+    }
+    
+    
+    if(!presetUsed) {
+      if(tcMode) {
+        timeS = timeS * 10 + value;
+        timeM = timeM * 10 + int(timeS / 100);
+        timeS %= 100;
+        timeM %= 100;
+      } else {
+        timeM += value;
+        running = true;
+      }
+    }
+  }
 }
 
 public void preset() {
-  presetMode = !presetMode;
-  String[] presetText = {"Popcorn", "Potatoe", "Pizza", "Frozen Food", "Beef", "Chicken"};
-  String[] numberText = {"1", "2", "3", "4", "5", "6"};
-  
-  for (int i = 0; i < 6; i++) {
-    if(presetMode) {
-      presets[i].setCaptionLabel(presetText[i]);
-    } else {
-      presets[i].setCaptionLabel(numberText[i]);
-    }  
+  if (setupComplete) {
+    presetMode = !presetMode;
+    String[] presetText = {"Popcorn", "Potatoe", "Pizza", "Frozen Food", "Beef", "Chicken"};
+    String[] numberText = {"1", "2", "3", "4", "5", "6"};
+    
+    for (int i = 0; i < 6; i++) {
+      if(presetMode) {
+        presets[i].setCaptionLabel(presetText[i]);
+      } else {
+        presets[i].setCaptionLabel(numberText[i]);
+      }  
+    }
   }
 }
