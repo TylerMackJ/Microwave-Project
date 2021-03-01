@@ -10,6 +10,7 @@ I chose to go with the microwave in my apartment which is shown below.
 
 ![Microwave](./pictures/realMicrowave.png)
 
+
 ### Issue
 
 When using the reheat function on the microwave, it allows you to pick a reheat preset. This issue with this is how you select a preset. You are supposed to click one of the numbers which will then make the screen display the preset name. For example: 1 is used to reheat pasta, and 2 is used to reheat meat. Unless you remember all the preset options, you have to click them all one by one in order to determine all the options.
@@ -40,6 +41,7 @@ When using the power level, I have came to found you need to have selected time 
 
 ## My Touchscreen Microwave
 
+[![](http://img.youtube.com/vi/q6YBKWSxpA0/0.jpg)](http://www.youtube.com/watch?v=q6YBKWSxpA0 "Microwave Video")
 ![Processing Microwave Gif](./pictures/processingMicrowave.gif)
 
 ### Changes and Thoughts
