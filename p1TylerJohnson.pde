@@ -105,6 +105,10 @@ void draw() {
 
 public void open() {
   doorOpen = !doorOpen;  
+  
+  if (doorOpen) {
+    running = false;
+  }
 }
 
 public void zero() {
@@ -155,6 +159,9 @@ public void timecook() {
 public void start() {
   if(setupComplete) {
     running = !running;
+    if (running && doorOpen) {
+      running = false;
+    }
     frame = 0;
   }
 }
